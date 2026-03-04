@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Launcher Test</title>
+</head>
+<body>
+  <h1>ClawBot Launcher 诊断页面</h1>
+  <div id="status"></div>
+  <script>
+    const status = document.getElementById('status');
+    
+    // 检查 localStorage
+    try {
+      localStorage.setItem('test', 'ok');
+      localStorage.removeItem('test');
+      status.innerHTML += '<p>✅ localStorage 正常</p>';
+    } catch (e) {
+      status.innerHTML += '<p>❌ localStorage 错误: ' + e + '</p>';
+    }
+    
+    // 显示已有配置
+    const config = localStorage.getItem('clawdbot-launcher-config');
+    if (config) {
+      status.innerHTML += '<p>📁 已有配置:</p><pre>' + JSON.stringify(JSON.parse(config), null, 2) + '</pre>';
+    } else {
+      status.innerHTML += '<p>📝 暂无配置</p>';
+    }
+    
+    // 链接到主应用
+    status.innerHTML += '<p><a href="http://localhost:5173">打开主应用</a></p>';
+  </script>
+</body>
+</html>
