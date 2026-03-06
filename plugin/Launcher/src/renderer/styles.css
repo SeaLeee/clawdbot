@@ -103,6 +103,267 @@ body {
   margin-bottom: 20px;
 }
 
+/* One-Click Section */
+.one-click-section {
+  background: white;
+  border-radius: 16px;
+  padding: 24px;
+  margin-bottom: 24px;
+  box-shadow: 0 4px 16px rgba(102, 126, 234, 0.12);
+  border: 1px solid rgba(102, 126, 234, 0.15);
+}
+
+.one-click-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.one-click-header h2 {
+  font-size: 20px;
+  font-weight: 700;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.one-click-icon {
+  width: 24px;
+  height: 24px;
+  color: #667eea;
+}
+
+.one-click-subtitle {
+  font-size: 13px;
+  color: #999;
+  margin-left: 4px;
+}
+
+.one-click-buttons {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.one-click-btn {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 20px;
+  border: 2px solid #e8e8e8;
+  border-radius: 14px;
+  background: white;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+}
+
+.one-click-btn::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  border-radius: 12px;
+}
+
+.one-click-btn:hover:not(:disabled) {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+.one-click-btn:active:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+.one-click-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.one-click-btn.loading {
+  pointer-events: none;
+}
+
+/* OpenClaw button */
+.one-click-openclaw {
+  border-color: rgba(102, 126, 234, 0.3);
+}
+
+.one-click-openclaw::before {
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.06), rgba(118, 75, 162, 0.06));
+}
+
+.one-click-openclaw:hover:not(:disabled) {
+  border-color: #667eea;
+  box-shadow: 0 8px 24px rgba(102, 126, 234, 0.25);
+}
+
+.one-click-openclaw:hover:not(:disabled)::before {
+  opacity: 1;
+}
+
+.one-click-openclaw .one-click-btn-content svg {
+  color: #667eea;
+}
+
+/* Crabwalk button */
+.one-click-crabwalk {
+  border-color: rgba(0, 150, 136, 0.3);
+}
+
+.one-click-crabwalk::before {
+  background: linear-gradient(135deg, rgba(0, 150, 136, 0.06), rgba(38, 166, 154, 0.06));
+}
+
+.one-click-crabwalk:hover:not(:disabled) {
+  border-color: #009688;
+  box-shadow: 0 8px 24px rgba(0, 150, 136, 0.25);
+}
+
+.one-click-crabwalk:hover:not(:disabled)::before {
+  opacity: 1;
+}
+
+.one-click-crabwalk .one-click-btn-content svg {
+  color: #009688;
+}
+
+/* Dashboard button */
+.one-click-dashboard {
+  border-color: rgba(156, 39, 176, 0.3);
+}
+
+.one-click-dashboard::before {
+  background: linear-gradient(135deg, rgba(156, 39, 176, 0.06), rgba(171, 71, 188, 0.06));
+}
+
+.one-click-dashboard:hover:not(:disabled) {
+  border-color: #9c27b0;
+  box-shadow: 0 8px 24px rgba(156, 39, 176, 0.25);
+}
+
+.one-click-dashboard:hover:not(:disabled)::before {
+  opacity: 1;
+}
+
+.one-click-dashboard .one-click-btn-content svg {
+  color: #9c27b0;
+}
+
+.one-click-dashboard .one-click-spinner {
+  border-top-color: #9c27b0;
+}
+
+/* All button */
+.one-click-all {
+  border-color: rgba(255, 152, 0, 0.3);
+  grid-column: 1 / -1;
+}
+
+.one-click-all::before {
+  background: linear-gradient(135deg, rgba(255, 152, 0, 0.06), rgba(255, 167, 38, 0.06));
+}
+
+.one-click-all:hover:not(:disabled) {
+  border-color: #ff9800;
+  box-shadow: 0 8px 24px rgba(255, 152, 0, 0.25);
+}
+
+.one-click-all:hover:not(:disabled)::before {
+  opacity: 1;
+}
+
+.one-click-all .one-click-btn-content svg {
+  color: #ff9800;
+}
+
+.one-click-btn-content {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  z-index: 1;
+}
+
+.one-click-btn-text {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+}
+
+.one-click-btn-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: #333;
+}
+
+.one-click-btn-desc {
+  font-size: 12px;
+  color: #999;
+}
+
+.one-click-spinner {
+  width: 20px;
+  height: 20px;
+  border: 2.5px solid #e0e0e0;
+  border-top-color: #667eea;
+  border-radius: 50%;
+  animation: one-click-spin 0.8s linear infinite;
+  z-index: 1;
+  flex-shrink: 0;
+}
+
+.one-click-crabwalk .one-click-spinner {
+  border-top-color: #009688;
+}
+
+.one-click-all .one-click-spinner {
+  border-top-color: #ff9800;
+}
+
+@keyframes one-click-spin {
+  to { transform: rotate(360deg); }
+}
+
+.one-click-status-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #ccc;
+  flex-shrink: 0;
+  z-index: 1;
+}
+
+.one-click-status-dot.active {
+  background: #4caf50;
+  box-shadow: 0 0 8px rgba(76, 175, 80, 0.5);
+  animation: one-click-dot-pulse 2s infinite;
+}
+
+@keyframes one-click-dot-pulse {
+  0%, 100% { box-shadow: 0 0 8px rgba(76, 175, 80, 0.5); }
+  50% { box-shadow: 0 0 16px rgba(76, 175, 80, 0.8); }
+}
+
+@media (max-width: 768px) {
+  .one-click-buttons {
+    grid-template-columns: 1fr;
+  }
+  
+  .one-click-header {
+    flex-wrap: wrap;
+  }
+  
+  .one-click-subtitle {
+    width: 100%;
+    margin-left: 34px;
+  }
+}
+
 /* Service Card */
 .service-card {
   background: white;

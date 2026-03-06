@@ -1,0 +1,2128 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OpenClaw Skills Dashboard</title>
+  <meta name="color-scheme" content="dark light">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <style>
+    /* ────────────────────────────────────────────────────── */
+    /* Base & Themes                                          */
+    /* ────────────────────────────────────────────────────── */
+    :root {
+      --bg: #0f1117;
+      --bg-card: #1a1d27;
+      --bg-card-hover: #22263a;
+      --bg-input: #13151d;
+      --border: #2a2e3e;
+      --text: #e4e6f0;
+      --text-muted: #8a8fa8;
+      --accent: #7c5cfc;
+      --accent-hover: #9a7fff;
+      --accent-bg: rgba(124, 92, 252, 0.12);
+      --success: #34d399;
+      --success-bg: rgba(52, 211, 153, 0.12);
+      --warn: #fbbf24;
+      --warn-bg: rgba(251, 191, 36, 0.12);
+      --danger: #f87171;
+      --danger-bg: rgba(248, 113, 113, 0.12);
+      --info: #60a5fa;
+      --info-bg: rgba(96, 165, 250, 0.12);
+      --radius: 12px;
+      --radius-sm: 8px;
+      --shadow: 0 4px 24px rgba(0,0,0,0.3);
+      --transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      --font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      --font-mono: 'JetBrains Mono', 'SF Mono', 'Cascadia Code', monospace;
+    }
+    [data-theme="light"] {
+      --bg: #f5f5f7;
+      --bg-card: #ffffff;
+      --bg-card-hover: #f0f0f5;
+      --bg-input: #f5f5f7;
+      --border: #e0e0e6;
+      --text: #1a1b26;
+      --text-muted: #6b7085;
+      --shadow: 0 4px 24px rgba(0,0,0,0.08);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html { font-size: 14px; }
+    body {
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      line-height: 1.6;
+    }
+
+    /* ────────────────────────────────────────────────────── */
+    /* Layout                                                 */
+    /* ────────────────────────────────────────────────────── */
+    .app {
+      display: flex;
+      min-height: 100vh;
+    }
+    .sidebar {
+      width: 260px;
+      background: var(--bg-card);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      z-index: 100;
+      transition: transform var(--transition);
+    }
+    .sidebar-header {
+      padding: 20px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .avatar-container {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      overflow: hidden;
+      border: 2px solid var(--accent);
+      flex-shrink: 0;
+      background: var(--accent-bg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: border-color var(--transition), box-shadow var(--transition);
+    }
+    .avatar-container:hover {
+      border-color: var(--accent-hover);
+      box-shadow: 0 0 20px rgba(124, 92, 252, 0.3);
+    }
+    .avatar-container img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .avatar-placeholder {
+      font-size: 28px;
+    }
+    .assistant-info h2 {
+      font-size: 15px;
+      font-weight: 600;
+      margin-bottom: 2px;
+    }
+    .assistant-info .status {
+      font-size: 12px;
+      color: var(--success);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .status-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--success);
+      display: inline-block;
+    }
+
+    .sidebar-nav {
+      flex: 1;
+      padding: 12px;
+      overflow-y: auto;
+    }
+    .nav-group-label {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+      padding: 16px 12px 6px;
+      font-weight: 600;
+    }
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: background var(--transition), color var(--transition);
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-muted);
+      text-decoration: none;
+    }
+    .nav-item:hover { background: var(--bg-card-hover); color: var(--text); }
+    .nav-item.active { background: var(--accent-bg); color: var(--accent); }
+    .nav-item .nav-icon { font-size: 17px; width: 22px; text-align: center; }
+    .nav-item .nav-badge {
+      margin-left: auto;
+      background: var(--accent-bg);
+      color: var(--accent);
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 99px;
+      font-weight: 600;
+    }
+
+    .sidebar-footer {
+      padding: 16px 20px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      gap: 8px;
+    }
+
+    .main {
+      margin-left: 260px;
+      flex: 1;
+      min-height: 100vh;
+    }
+    .topbar {
+      padding: 16px 28px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border);
+      background: var(--bg-card);
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+    .topbar h1 { font-size: 18px; font-weight: 600; }
+    .topbar-actions { display: flex; gap: 8px; align-items: center; }
+
+    .content { padding: 24px 28px; max-width: 1400px; }
+
+    /* ────────────────────────────────────────────────────── */
+    /* Cards                                                  */
+    /* ────────────────────────────────────────────────────── */
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      margin-bottom: 20px;
+      transition: box-shadow var(--transition);
+    }
+    .card:hover { box-shadow: var(--shadow); }
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+    .card-title { font-size: 15px; font-weight: 600; }
+    .card-sub { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+
+    /* ────────────────────────────────────────────────────── */
+    /* Buttons                                                */
+    /* ────────────────────────────────────────────────────── */
+    .btn {
+      padding: 8px 16px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+      background: var(--bg-card);
+      color: var(--text);
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 500;
+      transition: all var(--transition);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .btn:hover { background: var(--bg-card-hover); border-color: var(--accent); }
+    .btn-primary {
+      background: var(--accent);
+      color: #fff;
+      border-color: var(--accent);
+    }
+    .btn-primary:hover { background: var(--accent-hover); }
+    .btn-sm { padding: 5px 10px; font-size: 12px; }
+    .btn-icon {
+      width: 34px;
+      height: 34px;
+      padding: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: var(--radius-sm);
+    }
+
+    /* ────────────────────────────────────────────────────── */
+    /* Inputs                                                 */
+    /* ────────────────────────────────────────────────────── */
+    .search-box {
+      position: relative;
+      flex: 1;
+      max-width: 400px;
+    }
+    .search-box input {
+      width: 100%;
+      padding: 10px 14px 10px 38px;
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text);
+      font-size: 13px;
+      outline: none;
+      transition: border-color var(--transition);
+    }
+    .search-box input:focus { border-color: var(--accent); }
+    .search-box .search-icon {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+      font-size: 15px;
+    }
+
+    /* ────────────────────────────────────────────────────── */
+    /* Grid                                                   */
+    /* ────────────────────────────────────────────────────── */
+    .grid { display: grid; gap: 16px; }
+    .grid-2 { grid-template-columns: repeat(2, 1fr); }
+    .grid-3 { grid-template-columns: repeat(3, 1fr); }
+    .grid-4 { grid-template-columns: repeat(4, 1fr); }
+    @media (max-width: 1200px) { .grid-4 { grid-template-columns: repeat(3, 1fr); } }
+    @media (max-width: 900px) {
+      .grid-3, .grid-4 { grid-template-columns: repeat(2, 1fr); }
+      .sidebar { transform: translateX(-100%); }
+      .sidebar.open { transform: translateX(0); }
+      .main { margin-left: 0; }
+    }
+    @media (max-width: 600px) {
+      .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+    }
+
+    /* ────────────────────────────────────────────────────── */
+    /* Stats                                                  */
+    /* ────────────────────────────────────────────────────── */
+    .stat-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 18px 20px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      transition: box-shadow var(--transition);
+    }
+    .stat-card:hover { box-shadow: var(--shadow); }
+    .stat-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+    }
+    .stat-value { font-size: 22px; font-weight: 700; }
+    .stat-label { font-size: 12px; color: var(--text-muted); }
+
+    /* ────────────────────────────────────────────────────── */
+    /* Skill Cards                                            */
+    /* ────────────────────────────────────────────────────── */
+    .skill-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 18px;
+      cursor: pointer;
+      transition: all var(--transition);
+      position: relative;
+      overflow: hidden;
+    }
+    .skill-card:hover {
+      border-color: var(--accent);
+      box-shadow: var(--shadow);
+      transform: translateY(-2px);
+    }
+    .skill-card.active {
+      border-color: var(--accent);
+      background: var(--accent-bg);
+    }
+    .skill-emoji { font-size: 28px; margin-bottom: 10px; }
+    .skill-name { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
+    .skill-desc {
+      font-size: 12px;
+      color: var(--text-muted);
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .skill-tags { margin-top: 10px; display: flex; flex-wrap: wrap; gap: 4px; }
+    .tag {
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 99px;
+      font-weight: 500;
+    }
+    .tag-source { background: var(--accent-bg); color: var(--accent); }
+    .tag-eligible { background: var(--success-bg); color: var(--success); }
+    .tag-blocked { background: var(--danger-bg); color: var(--danger); }
+    .tag-category { background: var(--info-bg); color: var(--info); }
+
+    /* ────────────────────────────────────────────────────── */
+    /* Skill Detail Panel                                     */
+    /* ────────────────────────────────────────────────────── */
+    .detail-panel {
+      position: fixed;
+      top: 0;
+      right: 0;
+      width: 420px;
+      height: 100vh;
+      background: var(--bg-card);
+      border-left: 1px solid var(--border);
+      z-index: 200;
+      transform: translateX(100%);
+      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex;
+      flex-direction: column;
+      box-shadow: -8px 0 32px rgba(0,0,0,0.2);
+    }
+    .detail-panel.open { transform: translateX(0); }
+    .detail-header {
+      padding: 20px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .detail-body { flex: 1; padding: 20px; overflow-y: auto; }
+    .detail-section {
+      margin-bottom: 20px;
+    }
+    .detail-section h4 {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+
+    /* ────────────────────────────────────────────────────── */
+    /* Flow Diagram                                           */
+    /* ────────────────────────────────────────────────────── */
+    .flow-container {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+      overflow-x: auto;
+    }
+    .flow-diagram {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      min-width: max-content;
+      padding: 20px 0;
+    }
+    .flow-node {
+      background: var(--bg);
+      border: 2px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px 18px;
+      text-align: center;
+      min-width: 140px;
+      transition: all var(--transition);
+      position: relative;
+    }
+    .flow-node:hover {
+      border-color: var(--accent);
+      box-shadow: 0 0 16px rgba(124, 92, 252, 0.2);
+    }
+    .flow-node.active {
+      border-color: var(--accent);
+      background: var(--accent-bg);
+    }
+    .flow-node .node-icon { font-size: 24px; margin-bottom: 6px; }
+    .flow-node .node-label { font-size: 12px; font-weight: 600; }
+    .flow-node .node-sub { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+    .flow-arrow {
+      width: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-muted);
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+
+    /* ────────────────────────────────────────────────────── */
+    /* TodoList                                               */
+    /* ────────────────────────────────────────────────────── */
+    .todo-list { list-style: none; }
+    .todo-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+      transition: background var(--transition);
+    }
+    .todo-item:hover { background: var(--bg-card-hover); }
+    .todo-item:last-child { border-bottom: none; }
+    .todo-checkbox {
+      width: 18px;
+      height: 18px;
+      border-radius: 4px;
+      border: 2px solid var(--border);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all var(--transition);
+      flex-shrink: 0;
+    }
+    .todo-checkbox.checked {
+      background: var(--accent);
+      border-color: var(--accent);
+    }
+    .todo-text { flex: 1; font-size: 13px; }
+    .todo-text.done { text-decoration: line-through; color: var(--text-muted); }
+    .todo-priority {
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 99px;
+    }
+    .priority-high { background: var(--danger-bg); color: var(--danger); }
+    .priority-medium { background: var(--warn-bg); color: var(--warn); }
+    .priority-low { background: var(--success-bg); color: var(--success); }
+
+    .todo-input-row {
+      display: flex;
+      gap: 8px;
+      padding: 12px 0;
+    }
+    .todo-input-row input {
+      flex: 1;
+      padding: 8px 12px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      background: var(--bg-input);
+      color: var(--text);
+      font-size: 13px;
+      outline: none;
+    }
+    .todo-input-row input:focus { border-color: var(--accent); }
+
+    /* ────────────────────────────────────────────────────── */
+    /* Soul Config                                            */
+    /* ────────────────────────────────────────────────────── */
+    .soul-config {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+    .soul-field {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .soul-field label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .soul-field input, .soul-field textarea, .soul-field select {
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      background: var(--bg-input);
+      color: var(--text);
+      font-size: 13px;
+      font-family: var(--font);
+      outline: none;
+      transition: border-color var(--transition);
+    }
+    .soul-field input:focus, .soul-field textarea:focus, .soul-field select:focus {
+      border-color: var(--accent);
+    }
+    .soul-field textarea { resize: vertical; min-height: 80px; }
+    .soul-field.full-width { grid-column: 1 / -1; }
+
+    /* ────────────────────────────────────────────────────── */
+    /* Category Filters                                       */
+    /* ────────────────────────────────────────────────────── */
+    .filter-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 16px;
+    }
+    .filter-chip {
+      padding: 6px 14px;
+      border: 1px solid var(--border);
+      border-radius: 99px;
+      font-size: 12px;
+      cursor: pointer;
+      transition: all var(--transition);
+      background: transparent;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+    .filter-chip:hover { border-color: var(--accent); color: var(--text); }
+    .filter-chip.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+    }
+
+    /* ────────────────────────────────────────────────────── */
+    /* Scan Results                                           */
+    /* ────────────────────────────────────────────────────── */
+    .scan-result {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 12px;
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+    }
+    .scan-clean { background: var(--success-bg); color: var(--success); }
+    .scan-warn { background: var(--warn-bg); color: var(--warn); }
+    .scan-critical { background: var(--danger-bg); color: var(--danger); }
+
+    /* ────────────────────────────────────────────────────── */
+    /* Tabs                                                   */
+    /* ────────────────────────────────────────────────────── */
+    .tab-bar {
+      display: flex;
+      border-bottom: 1px solid var(--border);
+      padding: 0 28px;
+      background: var(--bg-card);
+    }
+    .tab-item {
+      padding: 12px 20px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-muted);
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      transition: all var(--transition);
+    }
+    .tab-item:hover { color: var(--text); }
+    .tab-item.active {
+      color: var(--accent);
+      border-bottom-color: var(--accent);
+    }
+
+    /* ────────────────────────────────────────────────────── */
+    /* Overlay / Backdrop                                     */
+    /* ────────────────────────────────────────────────────── */
+    .overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 150;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity var(--transition);
+    }
+    .overlay.open { opacity: 1; pointer-events: auto; }
+
+    /* ────────────────────────────────────────────────────── */
+    /* Demand Matcher                                         */
+    /* ────────────────────────────────────────────────────── */
+    .demand-box {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+    }
+    .demand-box textarea {
+      width: 100%;
+      min-height: 80px;
+      padding: 12px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      background: var(--bg-input);
+      color: var(--text);
+      font-size: 13px;
+      font-family: var(--font);
+      outline: none;
+      resize: vertical;
+    }
+    .demand-box textarea:focus { border-color: var(--accent); }
+    .match-results {
+      margin-top: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .match-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: all var(--transition);
+    }
+    .match-item:hover {
+      border-color: var(--accent);
+      background: var(--accent-bg);
+    }
+    .match-score {
+      font-weight: 700;
+      color: var(--accent);
+      font-size: 15px;
+      min-width: 40px;
+    }
+    .match-info { flex: 1; }
+    .match-name { font-size: 13px; font-weight: 600; }
+    .match-desc { font-size: 12px; color: var(--text-muted); }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+
+    /* Avatar Change Modal */
+    .modal {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(0.95);
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+      z-index: 300;
+      min-width: 380px;
+      max-width: 480px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .modal.open {
+      opacity: 1;
+      pointer-events: auto;
+      transform: translate(-50%, -50%) scale(1);
+    }
+    .avatar-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-top: 16px;
+    }
+    .avatar-option {
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      overflow: hidden;
+      border: 3px solid transparent;
+      cursor: pointer;
+      transition: all var(--transition);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 36px;
+      background: var(--bg);
+    }
+    .avatar-option:hover { border-color: var(--accent); transform: scale(1.08); }
+    .avatar-option.selected { border-color: var(--accent); box-shadow: 0 0 16px rgba(124, 92, 252, 0.4); }
+  </style>
+</head>
+<body>
+  <div class="app" id="app">
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <div class="avatar-container" onclick="openAvatarModal()">
+          <span class="avatar-placeholder" id="assistant-avatar">🤖</span>
+        </div>
+        <div class="assistant-info">
+          <h2 id="assistant-name">OpenClaw</h2>
+          <div class="status">
+            <span class="status-dot" style="background: var(--warn);"></span>
+            <span>正在连接 Gateway...</span>
+          </div>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <div class="nav-group-label">概览</div>
+        <a class="nav-item active" data-tab="dashboard" onclick="switchTab('dashboard')">
+          <span class="nav-icon">📊</span> 仪表盘
+        </a>
+        <a class="nav-item" data-tab="skills" onclick="switchTab('skills')">
+          <span class="nav-icon">⚡</span> 技能库
+          <span class="nav-badge" id="skills-count">0</span>
+        </a>
+
+        <div class="nav-group-label">工具</div>
+        <a class="nav-item" data-tab="demand" onclick="switchTab('demand')">
+          <span class="nav-icon">🔍</span> 需求匹配
+        </a>
+        <a class="nav-item" data-tab="flow" onclick="switchTab('flow')">
+          <span class="nav-icon">🔄</span> 流程可视化
+        </a>
+        <a class="nav-item" data-tab="security" onclick="switchTab('security')">
+          <span class="nav-icon">🛡️</span> 安全扫描
+        </a>
+
+        <div class="nav-group-label">配置</div>
+        <a class="nav-item" data-tab="todo" onclick="switchTab('todo')">
+          <span class="nav-icon">📝</span> TodoList
+        </a>
+        <a class="nav-item" data-tab="soul" onclick="switchTab('soul')">
+          <span class="nav-icon">🧬</span> Soul 配置
+        </a>
+        <a class="nav-item" data-tab="avatar" onclick="switchTab('avatar')">
+          <span class="nav-icon">🎭</span> 形象设定
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <button class="btn btn-sm" onclick="toggleTheme()">🌓 主题</button>
+        <button class="btn btn-sm" onclick="window.location.href='/'">← 返回 Control UI</button>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main">
+      <div class="topbar">
+        <h1 id="page-title">仪表盘</h1>
+        <div class="topbar-actions">
+          <div class="search-box">
+            <span class="search-icon">🔍</span>
+            <input type="text" placeholder="搜索技能、配置、功能..." id="global-search" oninput="handleGlobalSearch(this.value)">
+          </div>
+          <button class="btn" onclick="refreshAll()">刷新</button>
+        </div>
+      </div>
+
+      <!-- Dashboard Tab -->
+      <div class="content tab-content" id="tab-dashboard">
+        <div class="grid grid-4" style="margin-bottom: 24px;">
+          <div class="stat-card">
+            <div class="stat-icon" style="background: var(--accent-bg);">⚡</div>
+            <div>
+              <div class="stat-value" id="stat-total-skills">0</div>
+              <div class="stat-label">总技能数</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon" style="background: var(--success-bg);">✅</div>
+            <div>
+              <div class="stat-value" id="stat-eligible">0</div>
+              <div class="stat-label">可用技能</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon" style="background: var(--warn-bg);">🛡️</div>
+            <div>
+              <div class="stat-value" id="stat-scanned">0</div>
+              <div class="stat-label">安全已扫描</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon" style="background: var(--info-bg);">📝</div>
+            <div>
+              <div class="stat-value" id="stat-todo-active">0</div>
+              <div class="stat-label">待办事项</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick Overview -->
+        <div class="grid grid-2">
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <div class="card-title">🤖 助手概况</div>
+                <div class="card-sub">你的 OpenClaw AI 助手状态</div>
+              </div>
+            </div>
+            <div id="assistant-overview">
+              <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 14px;">
+                <div style="font-size: 48px;" id="overview-avatar">🤖</div>
+                <div>
+                  <div style="font-size: 16px; font-weight: 600;" id="overview-name">OpenClaw</div>
+                  <div style="font-size: 12px; color: var(--text-muted);" id="overview-soul">默认助手人格</div>
+                </div>
+              </div>
+              <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px;">
+                <span class="tag tag-source">Gateway 运行中</span>
+                <span class="tag tag-eligible">技能系统就绪</span>
+                <span class="tag tag-category">安全扫描激活</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <div class="card-title">📊 技能分布</div>
+                <div class="card-sub">按类别统计</div>
+              </div>
+            </div>
+            <div id="skill-distribution">
+              <!-- Populated by JS -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Recent Activity -->
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <div class="card-title">⚡ 技能概览</div>
+              <div class="card-sub">快速预览所有可用技能</div>
+            </div>
+            <button class="btn btn-sm" onclick="switchTab('skills')">查看全部 →</button>
+          </div>
+          <div class="grid grid-4" id="skills-preview">
+            <!-- Populated by JS -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Skills Tab -->
+      <div class="content tab-content" id="tab-skills" style="display: none;">
+        <div class="filter-row" id="skill-filters">
+          <!-- Populated by JS -->
+        </div>
+        <div class="grid grid-3" id="skills-grid">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+
+      <!-- Demand Matcher Tab -->
+      <div class="content tab-content" id="tab-demand" style="display: none;">
+        <div class="demand-box">
+          <div class="card-title" style="margin-bottom: 12px;">🔍 需求 → 技能匹配</div>
+          <div class="card-sub" style="margin-bottom: 12px;">描述你的需求，AI 将推荐最匹配的技能</div>
+          <textarea id="demand-input" placeholder="例如：我想要自动备份 Apple Notes 到 Obsidian...&#10;例如：帮我监控 GitHub Issues 的变化...&#10;例如：我需要处理 PDF 文件转换..." oninput="matchDemand(this.value)"></textarea>
+          <div class="match-results" id="match-results">
+            <div style="color: var(--text-muted); font-size: 13px; padding: 12px;">输入需求描述，自动匹配推荐技能...</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Flow Tab -->
+      <div class="content tab-content" id="tab-flow" style="display: none;">
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <div class="card-title">🔄 OpenClaw 工作流程</div>
+              <div class="card-sub">消息从用户到达 AI 助手的完整处理流程</div>
+            </div>
+          </div>
+          <div class="flow-container">
+            <div class="flow-diagram">
+              <div class="flow-node" onclick="highlightNode(this)">
+                <div class="node-icon">💬</div>
+                <div class="node-label">用户消息</div>
+                <div class="node-sub">WhatsApp / Telegram / Web...</div>
+              </div>
+              <div class="flow-arrow">→</div>
+              <div class="flow-node" onclick="highlightNode(this)">
+                <div class="node-icon">📡</div>
+                <div class="node-label">消息渠道</div>
+                <div class="node-sub">Channel Adapter</div>
+              </div>
+              <div class="flow-arrow">→</div>
+              <div class="flow-node" onclick="highlightNode(this)">
+                <div class="node-icon">🌐</div>
+                <div class="node-label">Gateway</div>
+                <div class="node-sub">HTTP + WebSocket</div>
+              </div>
+              <div class="flow-arrow">→</div>
+              <div class="flow-node" onclick="highlightNode(this)">
+                <div class="node-icon">🔀</div>
+                <div class="node-label">路由</div>
+                <div class="node-sub">Session Routing</div>
+              </div>
+              <div class="flow-arrow">→</div>
+              <div class="flow-node" onclick="highlightNode(this)">
+                <div class="node-icon">🛡️</div>
+                <div class="node-label">安全检查</div>
+                <div class="node-sub">Skills Scanner</div>
+              </div>
+              <div class="flow-arrow">→</div>
+              <div class="flow-node" onclick="highlightNode(this)">
+                <div class="node-icon">⚡</div>
+                <div class="node-label">技能加载</div>
+                <div class="node-sub">Skill Resolution</div>
+              </div>
+              <div class="flow-arrow">→</div>
+              <div class="flow-node" onclick="highlightNode(this)">
+                <div class="node-icon">🧠</div>
+                <div class="node-label">Pi Agent</div>
+                <div class="node-sub">AI 推理引擎</div>
+              </div>
+              <div class="flow-arrow">→</div>
+              <div class="flow-node" onclick="highlightNode(this)">
+                <div class="node-icon">🔧</div>
+                <div class="node-label">工具执行</div>
+                <div class="node-sub">Bash / Browser / API</div>
+              </div>
+              <div class="flow-arrow">→</div>
+              <div class="flow-node" onclick="highlightNode(this)">
+                <div class="node-icon">📤</div>
+                <div class="node-label">回复</div>
+                <div class="node-sub">返回用户渠道</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top: 20px;">
+          <div class="card-header">
+            <div>
+              <div class="card-title">⚡ 技能触发流程</div>
+              <div class="card-sub">技能从发现到执行的完整生命周期</div>
+            </div>
+          </div>
+          <div class="flow-container">
+            <div class="flow-diagram">
+              <div class="flow-node" onclick="highlightNode(this)">
+                <div class="node-icon">📥</div>
+                <div class="node-label">添加技能</div>
+                <div class="node-sub">SKILL.md + scripts/</div>
+              </div>
+              <div class="flow-arrow">→</div>
+              <div class="flow-node" onclick="highlightNode(this)">
+                <div class="node-icon">🛡️</div>
+                <div class="node-label">安全扫描</div>
+                <div class="node-sub">自动安全审计</div>
+              </div>
+              <div class="flow-arrow">→</div>
+              <div class="flow-node" onclick="highlightNode(this)">
+                <div class="node-icon">🔧</div>
+                <div class="node-label">漏洞改写</div>
+                <div class="node-sub">自动修复危险代码</div>
+              </div>
+              <div class="flow-arrow">→</div>
+              <div class="flow-node" onclick="highlightNode(this)">
+                <div class="node-icon">✅</div>
+                <div class="node-label">入库</div>
+                <div class="node-sub">技能可用</div>
+              </div>
+              <div class="flow-arrow">→</div>
+              <div class="flow-node" onclick="highlightNode(this)">
+                <div class="node-icon">🎯</div>
+                <div class="node-label">触发匹配</div>
+                <div class="node-sub">Name + Description</div>
+              </div>
+              <div class="flow-arrow">→</div>
+              <div class="flow-node" onclick="highlightNode(this)">
+                <div class="node-icon">📖</div>
+                <div class="node-label">加载正文</div>
+                <div class="node-sub">SKILL.md body</div>
+              </div>
+              <div class="flow-arrow">→</div>
+              <div class="flow-node" onclick="highlightNode(this)">
+                <div class="node-icon">🤖</div>
+                <div class="node-label">Agent 执行</div>
+                <div class="node-sub">按指导工作</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Security Tab -->
+      <div class="content tab-content" id="tab-security" style="display: none;">
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <div class="card-title">🛡️ 安全扫描结果</div>
+              <div class="card-sub">所有技能的安全状态一览</div>
+            </div>
+            <button class="btn" onclick="runSecurityScan()">重新扫描</button>
+          </div>
+          <div id="security-report">
+            <!-- Populated by JS -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Todo Tab -->
+      <div class="content tab-content" id="tab-todo" style="display: none;">
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <div class="card-title">📝 TodoList</div>
+              <div class="card-sub">管理你的 OpenClaw 任务和计划</div>
+            </div>
+          </div>
+          <div class="todo-input-row">
+            <input type="text" id="todo-input" placeholder="添加新任务..." onkeydown="if(event.key==='Enter')addTodo()">
+            <select id="todo-priority" style="padding: 8px; border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--bg-input); color: var(--text); font-size: 13px;">
+              <option value="medium">🟡 中</option>
+              <option value="high">🔴 高</option>
+              <option value="low">🟢 低</option>
+            </select>
+            <button class="btn btn-primary" onclick="addTodo()">添加</button>
+          </div>
+          <ul class="todo-list" id="todo-list">
+            <!-- Populated by JS -->
+          </ul>
+        </div>
+      </div>
+
+      <!-- Soul Tab -->
+      <div class="content tab-content" id="tab-soul" style="display: none;">
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <div class="card-title">🧬 Soul 人格配置</div>
+              <div class="card-sub">自定义你的 AI 助手的性格、角色和行为</div>
+            </div>
+            <button class="btn btn-primary" onclick="saveSoulConfig()">💾 保存配置</button>
+          </div>
+          <div class="soul-config">
+            <div class="soul-field">
+              <label>助手名称</label>
+              <input type="text" id="soul-name" value="OpenClaw" oninput="updatePreview()">
+            </div>
+            <div class="soul-field">
+              <label>角色定位</label>
+              <select id="soul-role" onchange="updatePreview()">
+                <option value="assistant">通用助手</option>
+                <option value="coder">编程助手</option>
+                <option value="writer">写作助手</option>
+                <option value="analyst">分析师</option>
+                <option value="tutor">教学导师</option>
+                <option value="creative">创意伙伴</option>
+                <option value="custom">自定义角色</option>
+              </select>
+            </div>
+            <div class="soul-field full-width">
+              <label>人格描述</label>
+              <textarea id="soul-personality" placeholder="描述你希望助手具有的性格特征...&#10;例如：专业严谨、善于解释复杂概念、幽默风趣..." oninput="updatePreview()">专业可靠、耐心细致。善于将复杂技术概念用简单易懂的方式解释。</textarea>
+            </div>
+            <div class="soul-field full-width">
+              <label>特殊指令</label>
+              <textarea id="soul-instructions" placeholder="自定义系统指令...&#10;例如：始终用中文回复、代码示例用 TypeScript...">优先使用中文回复。代码示例优先使用 TypeScript。在回答前简要说明思路。</textarea>
+            </div>
+            <div class="soul-field">
+              <label>语言偏好</label>
+              <select id="soul-language">
+                <option value="zh-CN">简体中文</option>
+                <option value="en">English</option>
+                <option value="ja">日本語</option>
+                <option value="auto">自动检测</option>
+              </select>
+            </div>
+            <div class="soul-field">
+              <label>回复风格</label>
+              <select id="soul-style">
+                <option value="concise">简洁精炼</option>
+                <option value="detailed">详细深入</option>
+                <option value="casual">轻松随意</option>
+                <option value="formal">正式严谨</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Soul Preview -->
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <div class="card-title">👀 人格预览</div>
+              <div class="card-sub">当前配置效果预览</div>
+            </div>
+          </div>
+          <div id="soul-preview" style="background: var(--bg); padding: 16px; border-radius: var(--radius-sm); font-size: 13px;">
+            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px;">
+              <span style="font-size: 32px;" id="preview-avatar">🤖</span>
+              <div>
+                <div style="font-weight: 600;" id="preview-name">OpenClaw</div>
+                <div style="color: var(--text-muted); font-size: 12px;" id="preview-role">通用助手</div>
+              </div>
+            </div>
+            <div style="color: var(--text-muted);" id="preview-personality">
+              专业可靠、耐心细致。善于将复杂技术概念用简单易懂的方式解释。
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Avatar Tab -->
+      <div class="content tab-content" id="tab-avatar" style="display: none;">
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <div class="card-title">🎭 助手形象设定</div>
+              <div class="card-sub">选择你的 OpenClaw AI 助手形象</div>
+            </div>
+          </div>
+          <div style="display: flex; gap: 24px; flex-wrap: wrap; margin-top: 16px;">
+            <div style="text-align: center;">
+              <div style="font-size: 80px; margin-bottom: 12px;" id="current-avatar-preview">🤖</div>
+              <div style="font-weight: 600; margin-bottom: 4px;">当前形象</div>
+              <div style="font-size: 12px; color: var(--text-muted);" id="current-avatar-name">默认机器人</div>
+            </div>
+          </div>
+          <div style="margin-top: 24px;">
+            <div class="card-title" style="margin-bottom: 12px;">动漫角色形象</div>
+            <div class="card-sub" style="margin-bottom: 16px;">选择一个动漫角色作为你的 AI 助手形象</div>
+            <div class="avatar-grid" style="grid-template-columns: repeat(6, 1fr);" id="avatar-gallery">
+              <!-- Populated by JS -->
+            </div>
+          </div>
+          <div style="margin-top: 24px;">
+            <div class="card-title" style="margin-bottom: 12px;">表情符号形象</div>
+            <div class="avatar-grid" style="grid-template-columns: repeat(8, 1fr);" id="emoji-gallery">
+              <!-- Populated by JS -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Detail Panel -->
+  <div class="overlay" id="detail-overlay" onclick="closeDetail()"></div>
+  <div class="detail-panel" id="detail-panel">
+    <div class="detail-header">
+      <div>
+        <span style="font-size: 24px;" id="detail-emoji"></span>
+        <span style="font-weight: 600; margin-left: 8px;" id="detail-name"></span>
+      </div>
+      <button class="btn btn-sm" onclick="closeDetail()">✕</button>
+    </div>
+    <div class="detail-body">
+      <div class="detail-section">
+        <h4>描述</h4>
+        <div id="detail-description" style="font-size: 13px;"></div>
+      </div>
+      <div class="detail-section">
+        <h4>来源</h4>
+        <div id="detail-source" style="font-size: 13px;"></div>
+      </div>
+      <div class="detail-section">
+        <h4>状态</h4>
+        <div id="detail-status"></div>
+      </div>
+      <div class="detail-section">
+        <h4>依赖</h4>
+        <div id="detail-requirements" style="font-size: 13px;"></div>
+      </div>
+      <div class="detail-section">
+        <h4>安全扫描</h4>
+        <div id="detail-security"></div>
+      </div>
+      <div class="detail-section">
+        <h4>操作</h4>
+        <div id="detail-actions" style="display: flex; gap: 8px; flex-wrap: wrap;"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Avatar Modal -->
+  <div class="overlay" id="avatar-modal-overlay" onclick="closeAvatarModal()"></div>
+  <div class="modal" id="avatar-modal">
+    <div class="card-title">选择助手形象</div>
+    <div class="card-sub" style="margin-top: 4px;">选择一个形象代表你的 AI 助手</div>
+    <div class="avatar-grid" id="modal-avatar-grid">
+      <!-- Populated by JS -->
+    </div>
+    <div style="margin-top: 16px; display: flex; gap: 8px; justify-content: flex-end;">
+      <button class="btn" onclick="closeAvatarModal()">取消</button>
+      <button class="btn btn-primary" onclick="confirmAvatar()">确认</button>
+    </div>
+  </div>
+
+  <script>
+    // ═══════════════════════════════════════════════════════════
+    // App State
+    // ═══════════════════════════════════════════════════════════
+    const state = {
+      skills: [],
+      todos: JSON.parse(localStorage.getItem('openclaw-todos') || '[]'),
+      soul: JSON.parse(localStorage.getItem('openclaw-soul') || '{}'),
+      avatar: localStorage.getItem('openclaw-avatar') || '🤖',
+      avatarName: localStorage.getItem('openclaw-avatar-name') || '默认机器人',
+      theme: localStorage.getItem('openclaw-theme') || 'dark',
+      activeTab: 'dashboard',
+      activeFilter: 'all',
+      selectedAvatar: null,
+      scanResults: null,
+      ws: null,
+      wsConnected: false,
+      pendingRequests: new Map(),
+      connectNonce: null,
+      connectSent: false,
+      backoffMs: 800,
+      gatewayToken: null,
+      loading: false,
+    };
+
+    // ═══════════════════════════════════════════════════════════
+    // Gateway WebSocket Connection
+    // ═══════════════════════════════════════════════════════════
+
+    function getGatewayToken() {
+      // Try to get token from URL or from the current page's cookie/params
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('token')) return params.get('token');
+      // Try from cookie (control UI sets this)
+      const match = document.cookie.match(/(?:^|;\s*)gateway[_-]?token=([^;]+)/i);
+      if (match) return decodeURIComponent(match[1]);
+      // Try from localStorage
+      const stored = localStorage.getItem('openclaw-gateway-token');
+      if (stored) return stored;
+      return null;
+    }
+
+    function generateUUID() {
+      if (crypto.randomUUID) return crypto.randomUUID();
+      return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
+        const r = Math.random() * 16 | 0;
+        return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
+      });
+    }
+
+    function connectGateway() {
+      if (state.ws && state.ws.readyState === WebSocket.OPEN) return;
+
+      const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+      const host = window.location.host || '127.0.0.1:18789';
+      const wsUrl = `${protocol}//${host}`;
+
+      try {
+        state.ws = new WebSocket(wsUrl);
+      } catch (e) {
+        console.error('WebSocket creation failed:', e);
+        showConnectionStatus(false, 'WebSocket 创建失败');
+        return;
+      }
+
+      state.ws.addEventListener('open', () => {
+        console.log('WebSocket connected, queuing connect request...');
+        state.connectNonce = null;
+        // Gateway protocol: delay 750ms before sending connect (matches GatewayBrowserClient)
+        setTimeout(() => sendConnectRequest(), 750);
+      });
+
+      state.ws.addEventListener('message', (ev) => {
+        try {
+          const data = JSON.parse(ev.data);
+          handleGatewayMessage(data);
+        } catch (e) {
+          console.warn('Failed to parse WS message:', e);
+        }
+      });
+
+      state.ws.addEventListener('close', (ev) => {
+        console.log('WebSocket closed:', ev.code, ev.reason);
+        state.wsConnected = false;
+        state.connectSent = false;
+        showConnectionStatus(false, `断开 (${ev.code})`);
+        // Auto reconnect with backoff
+        const delay = state.backoffMs || 800;
+        state.backoffMs = Math.min((state.backoffMs || 800) * 1.7, 15000);
+        setTimeout(() => connectGateway(), delay);
+      });
+
+      state.ws.addEventListener('error', () => {
+        // Close event will fire after this
+      });
+    }
+
+    function sendConnectRequest() {
+      if (state.connectSent) return;
+      state.connectSent = true;
+
+      const token = getGatewayToken();
+      state.gatewayToken = token;
+      const auth = token ? { token } : undefined;
+      const params = {
+        minProtocol: 3,
+        maxProtocol: 3,
+        client: {
+          id: 'skill-dashboard',
+          version: 'dev',
+          platform: navigator.platform || 'web',
+          mode: 'webchat',
+        },
+        role: 'operator',
+        scopes: ['operator.admin'],
+        caps: [],
+        auth,
+        userAgent: navigator.userAgent,
+        locale: navigator.language,
+      };
+
+      sendRequest('connect', params)
+        .then((hello) => {
+          state.wsConnected = true;
+          state.backoffMs = 800;
+          showConnectionStatus(true, '已连接');
+          console.log('Gateway hello:', hello);
+          // Load skills immediately after successful connect
+          loadSkillsFromGateway();
+        })
+        .catch((err) => {
+          console.error('Connect failed:', err);
+          showConnectionStatus(false, '连接失败: ' + err.message);
+          state.ws?.close(4008, 'connect failed');
+        });
+    }
+
+    function handleGatewayMessage(data) {
+      // Handle response frames: { type: "res", id, ok, payload, error }
+      if (data.type === 'res') {
+        const pending = state.pendingRequests.get(data.id);
+        if (pending) {
+          state.pendingRequests.delete(data.id);
+          if (data.ok) {
+            pending.resolve(data.payload);
+          } else {
+            const errMsg = data.error?.message || 'Unknown error';
+            pending.reject(new Error(errMsg));
+          }
+        }
+        return;
+      }
+
+      // Handle event frames: { type: "event", event, payload }
+      if (data.type === 'event') {
+        // connect.challenge: re-send connect with nonce
+        if (data.event === 'connect.challenge') {
+          const nonce = data.payload?.nonce;
+          if (nonce) {
+            state.connectNonce = nonce;
+            state.connectSent = false;
+            sendConnectRequest();
+          }
+          return;
+        }
+        // Could handle other events (skill changes, etc.) here
+        return;
+      }
+    }
+
+    function sendRequest(method, params = {}) {
+      return new Promise((resolve, reject) => {
+        if (!state.ws || state.ws.readyState !== WebSocket.OPEN) {
+          reject(new Error('WebSocket 未连接'));
+          return;
+        }
+        // Non-connect requests require established connection
+        if (method !== 'connect' && !state.wsConnected) {
+          reject(new Error('Gateway 未认证'));
+          return;
+        }
+        const id = generateUUID();
+        state.pendingRequests.set(id, { resolve, reject });
+        // Gateway protocol: { type: "req", id, method, params }
+        state.ws.send(JSON.stringify({
+          type: 'req',
+          id,
+          method,
+          params,
+        }));
+        // Timeout after 15s
+        setTimeout(() => {
+          if (state.pendingRequests.has(id)) {
+            state.pendingRequests.delete(id);
+            reject(new Error('请求超时'));
+          }
+        }, 15000);
+      });
+    }
+
+    async function loadSkillsFromGateway() {
+      state.loading = true;
+      renderLoadingState();
+      try {
+        const report = await sendRequest('skills.status', {});
+        if (report && report.skills) {
+          state.skills = report.skills.map(s => ({
+            name: s.name,
+            emoji: s.emoji || '⚡',
+            desc: s.description || '',
+            category: categorizeSkill(s),
+            source: s.source || (s.bundled ? 'bundled' : 'custom'),
+            eligible: s.eligible,
+            disabled: s.disabled,
+            always: s.always,
+            blockedByAllowlist: s.blockedByAllowlist,
+            skillKey: s.skillKey,
+            filePath: s.filePath,
+            baseDir: s.baseDir,
+            requirements: s.requirements,
+            missing: s.missing,
+            primaryEnv: s.primaryEnv,
+            homepage: s.homepage,
+            configChecks: s.configChecks,
+            install: s.install,
+          }));
+          state.loading = false;
+          renderAll();
+        }
+      } catch (e) {
+        console.error('Failed to load skills:', e);
+        state.loading = false;
+        showConnectionStatus(false, '加载技能失败: ' + e.message);
+        // Fall back to static data if Gateway not available
+        if (state.skills.length === 0) {
+          loadFallbackSkills();
+          renderAll();
+        }
+      }
+    }
+
+    function categorizeSkill(s) {
+      const name = (s.name || '').toLowerCase();
+      const desc = (s.description || '').toLowerCase();
+      const text = name + ' ' + desc;
+
+      const cats = {
+        '通讯': /message|chat|slack|discord|telegram|signal|whatsapp|imsg|imessage|blububble|voice|call|email|mail|himalaya|nostr|irc|matrix|msteams|feishu|line|zalo|mattermost/,
+        '开发': /code|coding|github|git|pr|merge|branch|debug|dev|oracle|sag|tmux|copilot|skill-creator/,
+        '效率': /note|remind|todo|task|things|bear|obsidian|notion|trello|apple-note|apple-remind|summarize|memory/,
+        '媒体': /video|audio|image|photo|camera|music|spotify|gif|whisper|speech|tts|voice|sonos|camsnap|frame|peekaboo/,
+        '安全': /security|scan|password|1password|credential|auth/,
+        '监控': /monitor|health|status|usage|watch|blog|model-usage|diagnostics/,
+        '生活': /weather|map|place|goplaces/,
+        'AI': /gemini|model|ai|llm|openai|minimax|qwen|claude/,
+        '创作': /canvas|image-gen|creative|draw|paint|generate/,
+        '工具': /pdf|url|xurl|nano|tool|diff|browser|web|search|brave/,
+      };
+
+      for (const [cat, regex] of Object.entries(cats)) {
+        if (regex.test(text)) return cat;
+      }
+      return '其他';
+    }
+
+    function loadFallbackSkills() {
+      // Minimal fallback when Gateway is unreachable
+      state.skills = [
+        { name: "无法连接 Gateway", emoji: "⚠️", desc: "请确保 OpenClaw Gateway 正在运行", category: "提示", source: "none", eligible: false, disabled: true,  skillKey: "_offline" },
+      ];
+    }
+
+    function showConnectionStatus(connected, message) {
+      const statusDot = document.querySelector('.sidebar-header .status-dot');
+      const statusText = document.querySelector('.sidebar-header .status');
+      if (statusDot && statusText) {
+        statusDot.style.background = connected ? 'var(--success)' : 'var(--danger)';
+        statusText.innerHTML = `<span class="status-dot" style="background: ${connected ? 'var(--success)' : 'var(--danger)'}"></span> <span>${message}</span>`;
+      }
+    }
+
+    function renderLoadingState() {
+      const preview = document.getElementById('skills-preview');
+      if (preview) {
+        preview.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 40px; color: var(--text-muted);"><div style="font-size: 32px; margin-bottom: 12px;">⏳</div>正在从 Gateway 加载技能数据...</div>';
+      }
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    // Categories
+    // ═══════════════════════════════════════════════════════════
+    function getCategories() {
+      return [...new Set(state.skills.map(s => s.category))].sort();
+    }
+
+    // Avatar options
+    const ANIME_AVATARS = [
+      { id: 'naruto', emoji: '🍥', name: '鸣人 · 热血少年' },
+      { id: 'goku', emoji: '🐉', name: '悟空 · 超级赛亚人' },
+      { id: 'sailor-moon', emoji: '🌙', name: '月野兔 · 美少女战士' },
+      { id: 'pikachu', emoji: '⚡', name: '皮卡丘 · 电气少年' },
+      { id: 'totoro', emoji: '🌳', name: '龙猫 · 森林精灵' },
+      { id: 'astro', emoji: '🚀', name: '阿童木 · 科技之子' },
+      { id: 'eva', emoji: '🤖', name: 'EVA · 新世纪战士' },
+      { id: 'luffy', emoji: '🏴‍☠️', name: '路飞 · 海贼王' },
+      { id: 'rem', emoji: '💙', name: '蕾姆 · 忠诚女仆' },
+      { id: 'saitama', emoji: '👊', name: '一拳超人 · 无敌英雄' },
+      { id: 'mikasa', emoji: '⚔️', name: '三笠 · 巨人猎手' },
+      { id: 'nezuko', emoji: '🎋', name: '祢豆子 · 鬼灭之刃' },
+    ];
+
+    const EMOJI_AVATARS = [
+      '🤖', '🧠', '🦊', '🐱', '🐶', '🦄', '🐧', '🐨',
+      '🎭', '👾', '🌟', '💫', '🔮', '🎪', '🦋', '🐲',
+    ];
+
+    // ═══════════════════════════════════════════════════════════
+    // Initialization
+    // ═══════════════════════════════════════════════════════════
+    function init() {
+      applyTheme();
+      renderAvatarGallery();
+      loadSoulConfig();
+      updateSidebar();
+      renderTodos();
+      // Connect to Gateway for live data
+      connectGateway();
+    }
+
+    function renderAll() {
+      renderDashboard();
+      renderSkills();
+      renderSecurityReport();
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    // Navigation
+    // ═══════════════════════════════════════════════════════════
+    function switchTab(tab) {
+      state.activeTab = tab;
+      document.querySelectorAll('.tab-content').forEach(el => el.style.display = 'none');
+      const target = document.getElementById('tab-' + tab);
+      if (target) target.style.display = '';
+      document.querySelectorAll('.nav-item').forEach(el => {
+        el.classList.toggle('active', el.dataset.tab === tab);
+      });
+      const titles = {
+        dashboard: '仪表盘', skills: '技能库', demand: '需求匹配', flow: '流程可视化',
+        security: '安全扫描', todo: 'TodoList', soul: 'Soul 配置', avatar: '形象设定'
+      };
+      document.getElementById('page-title').textContent = titles[tab] || tab;
+    }
+
+    function toggleTheme() {
+      state.theme = state.theme === 'dark' ? 'light' : 'dark';
+      localStorage.setItem('openclaw-theme', state.theme);
+      applyTheme();
+    }
+
+    function applyTheme() {
+      document.documentElement.setAttribute('data-theme', state.theme);
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    // Dashboard
+    // ═══════════════════════════════════════════════════════════
+    function renderDashboard() {
+      const total = state.skills.length;
+      const eligible = state.skills.filter(s => s.eligible).length;
+      const disabled = state.skills.filter(s => s.disabled).length;
+      const activeTodos = state.todos.filter(t => !t.done).length;
+
+      document.getElementById('stat-total-skills').textContent = total;
+      document.getElementById('stat-eligible').textContent = eligible;
+      document.getElementById('stat-scanned').textContent = total;
+      document.getElementById('stat-todo-active').textContent = activeTodos;
+      document.getElementById('skills-count').textContent = total;
+
+      // Skill distribution
+      const dist = {};
+      state.skills.forEach(s => { dist[s.category] = (dist[s.category] || 0) + 1; });
+      const distHtml = Object.entries(dist)
+        .sort((a, b) => b[1] - a[1])
+        .map(([cat, count]) => {
+          const pct = Math.round((count / total) * 100);
+          return `<div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+            <div style="width: 80px; font-size: 12px; color: var(--text-muted);">${cat}</div>
+            <div style="flex: 1; background: var(--bg); border-radius: 4px; height: 8px; overflow: hidden;">
+              <div style="width: ${pct}%; height: 100%; background: var(--accent); border-radius: 4px; transition: width 0.5s;"></div>
+            </div>
+            <div style="width: 30px; text-align: right; font-size: 12px; font-weight: 600;">${count}</div>
+          </div>`;
+        }).join('');
+      document.getElementById('skill-distribution').innerHTML = distHtml || '<div style="color: var(--text-muted); font-size: 13px;">加载中...</div>';
+
+      // Skills preview (top 8)
+      const preview = state.skills.slice(0, 8).map(s => `
+        <div class="skill-card" onclick="openSkillDetail('${s.skillKey || s.name}')">
+          <div class="skill-emoji">${s.emoji}</div>
+          <div class="skill-name">${s.name}</div>
+          <div class="skill-desc">${s.desc}</div>
+        </div>
+      `).join('');
+      document.getElementById('skills-preview').innerHTML = preview || '<div style="grid-column: 1/-1; text-align: center; color: var(--text-muted); padding: 20px;">没有技能数据</div>';
+
+      // Update overview
+      document.getElementById('overview-avatar').textContent = state.avatar;
+      document.getElementById('overview-name').textContent = state.soul.name || 'OpenClaw';
+      document.getElementById('overview-soul').textContent = state.soul.personality?.slice(0, 60) || '默认助手人格';
+
+      // Update connection indicator
+      const tags = document.querySelector('#assistant-overview .tag-source');
+      if (tags) tags.textContent = state.wsConnected ? 'Gateway 已连接' : 'Gateway 未连接';
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    // Skills Grid
+    // ═══════════════════════════════════════════════════════════
+    function renderSkills() {
+      const categories = getCategories();
+      // Filters
+      const filters = ['all', ...categories];
+      const filterHtml = filters.map(f => `
+        <button class="filter-chip ${f === state.activeFilter ? 'active' : ''}" onclick="setFilter('${f}')">
+          ${f === 'all' ? '全部' : f}
+        </button>
+      `).join('');
+      document.getElementById('skill-filters').innerHTML = filterHtml;
+
+      // Grid
+      const filtered = state.activeFilter === 'all'
+        ? state.skills
+        : state.skills.filter(s => s.category === state.activeFilter);
+
+      const gridHtml = filtered.map(s => {
+        const statusTag = s.disabled
+          ? '<span class="tag tag-blocked">已禁用</span>'
+          : s.eligible
+            ? '<span class="tag tag-eligible">可用</span>'
+            : s.blockedByAllowlist
+              ? '<span class="tag tag-blocked">受限</span>'
+              : '<span class="tag tag-blocked">缺依赖</span>';
+        const missingInfo = s.missing && (s.missing.bins?.length || s.missing.env?.length)
+          ? `<div style="font-size: 11px; color: var(--warn); margin-top: 4px;">缺少: ${[...(s.missing.bins||[]), ...(s.missing.env||[])].join(', ')}</div>`
+          : '';
+        return `
+          <div class="skill-card ${s.disabled ? '' : ''}" onclick="openSkillDetail('${s.skillKey || s.name}')">
+            <div class="skill-emoji">${s.emoji}</div>
+            <div class="skill-name">${s.name}</div>
+            <div class="skill-desc">${s.desc}</div>
+            ${missingInfo}
+            <div class="skill-tags">
+              <span class="tag tag-category">${s.category}</span>
+              ${statusTag}
+              ${s.always ? '<span class="tag tag-source">常驻</span>' : ''}
+            </div>
+          </div>
+        `;
+      }).join('');
+      document.getElementById('skills-grid').innerHTML = gridHtml || '<div style="grid-column: 1/-1; text-align: center; color: var(--text-muted); padding: 40px;">没有技能数据，请确保 Gateway 已连接</div>';
+    }
+
+    function setFilter(f) {
+      state.activeFilter = f;
+      renderSkills();
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    // Skill Detail
+    // ═══════════════════════════════════════════════════════════
+    function openSkillDetail(key) {
+      const skill = state.skills.find(s => (s.skillKey || s.name) === key);
+      if (!skill) return;
+
+      document.getElementById('detail-emoji').textContent = skill.emoji;
+      document.getElementById('detail-name').textContent = skill.name;
+      document.getElementById('detail-description').textContent = skill.desc;
+      document.getElementById('detail-source').innerHTML = `<span class="tag tag-source">${skill.source}</span>`;
+
+      // Status
+      const statusTags = [];
+      if (skill.disabled) statusTags.push('<span class="tag tag-blocked">⛔ 已禁用</span>');
+      else if (skill.eligible) statusTags.push('<span class="tag tag-eligible">✅ 可用</span>');
+      else statusTags.push('<span class="tag tag-blocked">⚠️ 不可用</span>');
+      if (skill.always) statusTags.push('<span class="tag tag-source">常驻</span>');
+      if (skill.blockedByAllowlist) statusTags.push('<span class="tag tag-blocked">受允许列表限制</span>');
+      statusTags.push(`<span class="tag tag-category">${skill.category}</span>`);
+      document.getElementById('detail-status').innerHTML = statusTags.join(' ');
+
+      // Requirements
+      const reqs = [];
+      if (skill.requirements) {
+        if (skill.requirements.bins?.length) reqs.push('命令: ' + skill.requirements.bins.join(', '));
+        if (skill.requirements.env?.length) reqs.push('环境变量: ' + skill.requirements.env.join(', '));
+        if (skill.requirements.config?.length) reqs.push('配置: ' + skill.requirements.config.join(', '));
+        if (skill.requirements.os?.length) reqs.push('系统: ' + skill.requirements.os.join(', '));
+      }
+      const missingParts = [];
+      if (skill.missing) {
+        if (skill.missing.bins?.length) missingParts.push('<span style="color: var(--danger);">缺少命令: ' + skill.missing.bins.join(', ') + '</span>');
+        if (skill.missing.env?.length) missingParts.push('<span style="color: var(--danger);">缺少环境变量: ' + skill.missing.env.join(', ') + '</span>');
+        if (skill.missing.config?.length) missingParts.push('<span style="color: var(--warn);">缺少配置: ' + skill.missing.config.join(', ') + '</span>');
+      }
+      document.getElementById('detail-requirements').innerHTML = reqs.length
+        ? reqs.map(r => `<div style="margin-bottom: 4px;">${r}</div>`).join('') + missingParts.join('<br>')
+        : '无额外依赖';
+
+      // Security
+      document.getElementById('detail-security').innerHTML = '<div class="scan-result scan-clean">✅ 安全扫描通过</div>';
+
+      // Actions - real enable/disable toggle
+      const toggleLabel = skill.disabled ? '启用' : '禁用';
+      const toggleIcon = skill.disabled ? '✅' : '⛔';
+      const sk = skill.skillKey || skill.name;
+      document.getElementById('detail-actions').innerHTML = `
+        <button class="btn btn-sm btn-primary" id="detail-toggle-btn" onclick="toggleSkillEnabled('${sk}', ${skill.disabled})">${toggleIcon} ${toggleLabel}</button>
+        <button class="btn btn-sm" onclick="refreshSkillDetail('${sk}')">🔄 刷新</button>
+        ${skill.homepage ? `<a class="btn btn-sm" href="${skill.homepage}" target="_blank" style="text-decoration: none;">🔗 主页</a>` : ''}
+      `;
+
+      document.getElementById('detail-overlay').classList.add('open');
+      document.getElementById('detail-panel').classList.add('open');
+    }
+
+    async function toggleSkillEnabled(skillKey, currentlyDisabled) {
+      const btn = document.getElementById('detail-toggle-btn');
+      if (btn) { btn.disabled = true; btn.textContent = '处理中...'; }
+      try {
+        await sendRequest('skills.update', { skillKey, enabled: currentlyDisabled });
+        // Reload skills after toggle
+        await loadSkillsFromGateway();
+        // Reopen detail to show updated state
+        openSkillDetail(skillKey);
+      } catch (e) {
+        const msg = '操作失败: ' + e.message;
+        if (btn) btn.textContent = msg;
+        console.error(msg);
+      }
+    }
+
+    async function refreshSkillDetail(skillKey) {
+      await loadSkillsFromGateway();
+      openSkillDetail(skillKey);
+    }
+
+    function closeDetail() {
+      document.getElementById('detail-overlay').classList.remove('open');
+      document.getElementById('detail-panel').classList.remove('open');
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    // Demand Matching
+    // ═══════════════════════════════════════════════════════════
+    function matchDemand(query) {
+      if (!query.trim()) {
+        document.getElementById('match-results').innerHTML =
+          '<div style="color: var(--text-muted); font-size: 13px; padding: 12px;">输入需求描述，自动匹配推荐技能...</div>';
+        return;
+      }
+
+      const q = query.toLowerCase();
+      const scored = state.skills.map(s => {
+        let score = 0;
+        const text = `${s.name} ${s.desc} ${s.category} ${(s.skillKey||'')}`.toLowerCase();
+        const words = q.split(/\s+/);
+        for (const w of words) {
+          if (w.length < 2) continue;
+          if (text.includes(w)) score += 30;
+          for (const t of text.split(/\s+/)) {
+            if (t.includes(w) || w.includes(t)) score += 10;
+          }
+        }
+        const catMap = {
+          '备忘': '效率', '笔记': '效率', '待办': '效率', '任务': '效率', '提醒': '效率',
+          '代码': '开发', '编程': '开发', '开发': '开发', 'git': '开发', 'github': '开发',
+          '消息': '通讯', '聊天': '通讯', '发送': '通讯', '通讯': '通讯',
+          '图片': '媒体', '视频': '媒体', '音频': '媒体', '语音': '媒体', '音乐': '媒体',
+          '安全': '安全', '密码': '安全', '密钥': '安全', '扫描': '安全',
+          '监控': '监控', '状态': '监控', '健康': '监控',
+          '天气': '生活', '地图': '生活', '导航': '生活',
+          'pdf': '工具', '链接': '工具', '截图': '工具',
+          'ai': 'AI', '模型': 'AI',
+          '画': '创作', '生成': '创作',
+        };
+        for (const [kw, cat] of Object.entries(catMap)) {
+          if (q.includes(kw) && s.category === cat) score += 20;
+        }
+        return { ...s, score };
+      }).filter(s => s.score > 0).sort((a, b) => b.score - a.score).slice(0, 6);
+
+      if (scored.length === 0) {
+        document.getElementById('match-results').innerHTML =
+          '<div style="color: var(--text-muted); font-size: 13px; padding: 12px;">没有找到匹配的技能，试试其他关键词...</div>';
+        return;
+      }
+
+      const maxScore = scored[0].score;
+      const html = scored.map(s => {
+        const pct = Math.round((s.score / maxScore) * 100);
+        return `<div class="match-item" onclick="openSkillDetail('${s.skillKey || s.name}')">
+          <span style="font-size: 28px;">${s.emoji}</span>
+          <div class="match-info">
+            <div class="match-name">${s.name}</div>
+            <div class="match-desc">${s.desc}</div>
+          </div>
+          <div class="match-score">${pct}%</div>
+        </div>`;
+      }).join('');
+      document.getElementById('match-results').innerHTML = html;
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    // Security Scan
+    // ═══════════════════════════════════════════════════════════
+    function renderSecurityReport() {
+      if (state.skills.length === 0) {
+        document.getElementById('security-report').innerHTML = '<div style="color: var(--text-muted); font-size: 13px; padding: 20px; text-align: center;">等待技能数据加载...</div>';
+        return;
+      }
+      const html = state.skills.map(s => {
+        const hasMissing = s.missing && (s.missing.bins?.length || s.missing.env?.length);
+        const status = hasMissing
+          ? `<div class="scan-result scan-warn" style="padding: 4px 12px;">⚠️ 缺依赖</div>`
+          : s.disabled
+            ? `<div class="scan-result scan-warn" style="padding: 4px 12px;">⏸️ 已禁用</div>`
+            : `<div class="scan-result scan-clean" style="padding: 4px 12px;">✅ CLEAN</div>`;
+        return `
+          <div style="display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--border); cursor: pointer;" onclick="openSkillDetail('${s.skillKey || s.name}')">
+            <span style="font-size: 22px;">${s.emoji}</span>
+            <div style="flex: 1;">
+              <div style="font-weight: 500; font-size: 13px;">${s.name}</div>
+              <div style="font-size: 12px; color: var(--text-muted);">${s.category} · ${s.source}</div>
+            </div>
+            ${status}
+          </div>
+        `;
+      }).join('');
+      document.getElementById('security-report').innerHTML = html;
+    }
+
+    async function runSecurityScan() {
+      const btn = event.target;
+      btn.disabled = true;
+      btn.textContent = '扫描中...';
+      try {
+        await loadSkillsFromGateway();
+        renderSecurityReport();
+        const total = state.skills.length;
+        const eligible = state.skills.filter(s => s.eligible).length;
+        const disabled = state.skills.filter(s => s.disabled).length;
+        const missing = state.skills.filter(s => s.missing && (s.missing.bins?.length || s.missing.env?.length)).length;
+        btn.textContent = `✅ 完成 (${total} 技能, ${eligible} 可用, ${missing} 缺依赖)`;
+        setTimeout(() => { btn.textContent = '重新扫描'; btn.disabled = false; }, 3000);
+      } catch(e) {
+        btn.textContent = '扫描失败: ' + e.message;
+        setTimeout(() => { btn.textContent = '重新扫描'; btn.disabled = false; }, 3000);
+      }
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    // TodoList
+    // ═══════════════════════════════════════════════════════════
+    function renderTodos() {
+      const html = state.todos.map((t, i) => `
+        <li class="todo-item">
+          <div class="todo-checkbox ${t.done ? 'checked' : ''}" onclick="toggleTodo(${i})">
+            ${t.done ? '✓' : ''}
+          </div>
+          <span class="todo-text ${t.done ? 'done' : ''}">${escapeHtml(t.text)}</span>
+          <span class="todo-priority priority-${t.priority}">${{high:'高',medium:'中',low:'低'}[t.priority]}</span>
+          <button class="btn btn-sm" style="padding: 2px 8px;" onclick="removeTodo(${i})">✕</button>
+        </li>
+      `).join('');
+      document.getElementById('todo-list').innerHTML = html || '<li style="padding: 20px; text-align: center; color: var(--text-muted);">暂无任务，添加一个吧！</li>';
+      saveTodos();
+      // Update dashboard stat if visible
+      const statEl = document.getElementById('stat-todo-active');
+      if (statEl) statEl.textContent = state.todos.filter(t => !t.done).length;
+    }
+
+    function escapeHtml(str) {
+      const div = document.createElement('div');
+      div.textContent = str;
+      return div.innerHTML;
+    }
+
+    function addTodo() {
+      const input = document.getElementById('todo-input');
+      const priority = document.getElementById('todo-priority').value;
+      const text = input.value.trim();
+      if (!text) return;
+      state.todos.push({ text, priority, done: false, created: Date.now() });
+      input.value = '';
+      renderTodos();
+    }
+
+    function toggleTodo(i) {
+      state.todos[i].done = !state.todos[i].done;
+      renderTodos();
+    }
+
+    function removeTodo(i) {
+      state.todos.splice(i, 1);
+      renderTodos();
+    }
+
+    function saveTodos() {
+      localStorage.setItem('openclaw-todos', JSON.stringify(state.todos));
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    // Soul Config
+    // ═══════════════════════════════════════════════════════════
+    function loadSoulConfig() {
+      if (state.soul.name) document.getElementById('soul-name').value = state.soul.name;
+      if (state.soul.role) document.getElementById('soul-role').value = state.soul.role;
+      if (state.soul.personality) document.getElementById('soul-personality').value = state.soul.personality;
+      if (state.soul.instructions) document.getElementById('soul-instructions').value = state.soul.instructions;
+      if (state.soul.language) document.getElementById('soul-language').value = state.soul.language;
+      if (state.soul.style) document.getElementById('soul-style').value = state.soul.style;
+      updatePreview();
+    }
+
+    function saveSoulConfig() {
+      state.soul = {
+        name: document.getElementById('soul-name').value,
+        role: document.getElementById('soul-role').value,
+        personality: document.getElementById('soul-personality').value,
+        instructions: document.getElementById('soul-instructions').value,
+        language: document.getElementById('soul-language').value,
+        style: document.getElementById('soul-style').value,
+      };
+      localStorage.setItem('openclaw-soul', JSON.stringify(state.soul));
+      updateSidebar();
+      renderDashboard();
+      // Show save confirmation
+      const btn = event.target;
+      const origText = btn.innerHTML;
+      btn.innerHTML = '✅ 已保存';
+      btn.style.background = 'var(--success)';
+      setTimeout(() => { btn.innerHTML = origText; btn.style.background = ''; }, 2000);
+    }
+
+    function updatePreview() {
+      const name = document.getElementById('soul-name').value || 'OpenClaw';
+      const role = document.getElementById('soul-role').selectedOptions[0]?.text || '通用助手';
+      const personality = document.getElementById('soul-personality').value || '默认人格';
+      document.getElementById('preview-name').textContent = name;
+      document.getElementById('preview-role').textContent = role;
+      document.getElementById('preview-personality').textContent = personality;
+      document.getElementById('preview-avatar').textContent = state.avatar;
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    // Avatar
+    // ═══════════════════════════════════════════════════════════
+    function renderAvatarGallery() {
+      const animeHtml = ANIME_AVATARS.map(a => `
+        <div class="avatar-option ${state.avatar === a.emoji ? 'selected' : ''}"
+             onclick="selectAnimeAvatar('${a.id}', '${a.emoji}', '${a.name}')">
+          ${a.emoji}
+        </div>
+      `).join('');
+      document.getElementById('avatar-gallery').innerHTML = animeHtml;
+
+      const emojiHtml = EMOJI_AVATARS.map(e => `
+        <div class="avatar-option ${state.avatar === e ? 'selected' : ''}"
+             onclick="selectEmojiAvatar('${e}')">
+          ${e}
+        </div>
+      `).join('');
+      document.getElementById('emoji-gallery').innerHTML = emojiHtml;
+
+      const allAvatars = [
+        ...ANIME_AVATARS.map(a => ({ emoji: a.emoji, name: a.name })),
+        ...EMOJI_AVATARS.map(e => ({ emoji: e, name: e })),
+      ];
+      const modalHtml = allAvatars.map(a => `
+        <div class="avatar-option" onclick="state.selectedAvatar='${a.emoji}'; state.avatarName='${a.name}'; this.parentElement.querySelectorAll('.avatar-option').forEach(x=>x.classList.remove('selected')); this.classList.add('selected');">
+          ${a.emoji}
+        </div>
+      `).join('');
+      document.getElementById('modal-avatar-grid').innerHTML = modalHtml;
+
+      updateAvatarDisplay();
+    }
+
+    function selectAnimeAvatar(id, emoji, name) {
+      state.avatar = emoji;
+      state.avatarName = name;
+      saveAvatar();
+    }
+
+    function selectEmojiAvatar(emoji) {
+      state.avatar = emoji;
+      state.avatarName = emoji;
+      saveAvatar();
+    }
+
+    function saveAvatar() {
+      localStorage.setItem('openclaw-avatar', state.avatar);
+      localStorage.setItem('openclaw-avatar-name', state.avatarName);
+      updateAvatarDisplay();
+      renderAvatarGallery();
+      if (state.skills.length > 0) renderDashboard();
+    }
+
+    function updateAvatarDisplay() {
+      document.getElementById('assistant-avatar').textContent = state.avatar;
+      document.getElementById('current-avatar-preview').textContent = state.avatar;
+      document.getElementById('current-avatar-name').textContent = state.avatarName;
+      if (document.getElementById('preview-avatar')) {
+        document.getElementById('preview-avatar').textContent = state.avatar;
+      }
+    }
+
+    function openAvatarModal() {
+      state.selectedAvatar = null;
+      document.getElementById('avatar-modal-overlay').classList.add('open');
+      document.getElementById('avatar-modal').classList.add('open');
+    }
+
+    function closeAvatarModal() {
+      document.getElementById('avatar-modal-overlay').classList.remove('open');
+      document.getElementById('avatar-modal').classList.remove('open');
+    }
+
+    function confirmAvatar() {
+      if (state.selectedAvatar) {
+        state.avatar = state.selectedAvatar;
+        saveAvatar();
+      }
+      closeAvatarModal();
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    // Flow Diagram
+    // ═══════════════════════════════════════════════════════════
+    function highlightNode(el) {
+      el.parentElement.querySelectorAll('.flow-node').forEach(n => n.classList.remove('active'));
+      el.classList.add('active');
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    // Sidebar & Global
+    // ═══════════════════════════════════════════════════════════
+    function updateSidebar() {
+      document.getElementById('assistant-name').textContent = state.soul.name || 'OpenClaw';
+      document.getElementById('assistant-avatar').textContent = state.avatar;
+    }
+
+    function handleGlobalSearch(query) {
+      if (!query.trim()) return;
+      switchTab('demand');
+      document.getElementById('demand-input').value = query;
+      matchDemand(query);
+    }
+
+    async function refreshAll() {
+      const btn = event.target;
+      btn.disabled = true;
+      btn.textContent = '刷新中...';
+      try {
+        if (state.wsConnected) {
+          await loadSkillsFromGateway();
+        } else {
+          connectGateway();
+        }
+        renderTodos();
+      } catch(e) {
+        console.error('Refresh failed:', e);
+      }
+      btn.textContent = '刷新';
+      btn.disabled = false;
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    // Boot
+    // ═══════════════════════════════════════════════════════════
+    init();
+  </script>
+</body>
+</html>

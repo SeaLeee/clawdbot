@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Skill Manager — Clawbot Skills管家</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <div id="app">
+    <!-- Header -->
+    <header class="header">
+      <div class="header-left">
+        <h1>🤖 Skill Manager</h1>
+        <span class="subtitle">Clawbot Skills管家</span>
+      </div>
+      <div class="header-right">
+        <div class="stats" id="stats">
+          <span class="stat-item" id="stat-total">-</span>
+          <span class="stat-item" id="stat-files">-</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Search & Filters -->
+    <div class="toolbar">
+      <div class="search-box">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="search" placeholder="搜索skill名称或描述..." autofocus>
+      </div>
+      <div class="filters">
+        <button class="filter-btn active" data-filter="all">全部</button>
+        <button class="filter-btn" data-filter="scripts">有脚本</button>
+        <button class="filter-btn" data-filter="references">有参考</button>
+        <button class="filter-btn" data-filter="assets">有资源</button>
+      </div>
+    </div>
+
+    <!-- Skill Grid -->
+    <main class="skill-grid" id="skillGrid">
+      <div class="loading">加载中...</div>
+    </main>
+
+    <!-- Skill Detail Modal -->
+    <div class="modal-overlay" id="modalOverlay">
+      <div class="modal" id="modal">
+        <button class="modal-close" id="modalClose">✕</button>
+        <div class="modal-header">
+          <h2 id="modalTitle"></h2>
+          <span class="modal-badge" id="modalBadge"></span>
+        </div>
+        <p class="modal-desc" id="modalDesc"></p>
+        <div class="modal-meta" id="modalMeta"></div>
+        <div class="modal-actions">
+          <button class="btn btn-scan" id="btnScan">🔒 安全扫描</button>
+        </div>
+        <div class="scan-result" id="scanResult" style="display:none"></div>
+        <div class="modal-content" id="modalContent"></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/app.js"></script>
+</body>
+</html>
